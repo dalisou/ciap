@@ -62,3 +62,8 @@
     line-height: 1.2;
   }
 }
+@media (max-width: 600px) {
+  .item-contato {
+    display: none;
+  }
+}
