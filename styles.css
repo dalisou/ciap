@@ -66,13 +66,4 @@
     display: none;
   }
 }
-@media (max-width: 600px) {
-  .botao-cadastro {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 1.2;
-    padding: 6px 10px;
-  }
-}
+
