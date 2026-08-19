@@ -49,3 +49,16 @@
     font-size: 30px;
   }
 }
+@media (max-width: 600px) {
+  nav ul {
+    gap: 6px;
+  }
+
+  nav ul li a.botao-cadastro,
+  nav ul li a.botao-contato {
+    padding: 6px 9px;
+    font-size: 12px;
+    border-radius: 4px;
+    line-height: 1.2;
+  }
+}
