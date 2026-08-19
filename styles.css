@@ -61,9 +61,8 @@
     border-radius: 4px;
     line-height: 1.2;
   }
-}
 @media (max-width: 600px) {
-  .item-contato {
+  nav ul li:has(.botao-contato) {
     display: none;
   }
 }
