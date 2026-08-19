@@ -36,3 +36,16 @@
 .whatsapp-flutuante i {
   font-size: 34px;
 }
+@media (max-width: 600px) {
+  .whatsapp-flutuante {
+    right: 16px;
+    bottom: 16px;
+    width: 54px;
+    height: 54px;
+  }
+
+  .whatsapp-flutuante i,
+  .whatsapp-simbolo {
+    font-size: 30px;
+  }
+}
