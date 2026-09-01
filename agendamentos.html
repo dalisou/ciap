@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CIAP-PB | Agendamentos</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    body { background: var(--mist); }
+    .page-shell { padding: 48px 0 90px; }
+    .page-header { margin-bottom: 32px; text-align: center; }
+    .page-header h1 { color: var(--red); margin: 0; }
+    .page-header p { color: var(--ink); font-size: 18px; margin-top: 10px; }
+    .booking-section { background: var(--green); border-radius: 30px; padding: 42px 0; }
+    .booking-wrap { display: grid; gap: 30px; }
+    .booking-grid { display: grid; grid-template-columns: 1fr; gap: 30px; align-items: start; }
+    .calendar-box, .booking-form { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); border-radius: 24px; padding: 24px; }
+    .calendar-header { display: none; }
+    .calendar-days { display: none; }
+    .booking-form { display: grid; gap: 18px; max-width: 780px; width: 100%; margin: 0 auto; }
+    .booking-form label { display: grid; gap: 8px; color: var(--white); font-weight: 700; }
+    .booking-form input, .booking-form select { width: 100%; border: 1px solid rgba(255,255,255,.45); background: rgba(255,255,255,.9); border-radius: 12px; padding: 12px 14px; font-size: 15px; color: var(--ink); }
+    .form-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+    .status-message { min-height: 24px; margin: 0; font-weight: 700; color: var(--white); }
+    .page-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 24px; }
+    .notice-box { background: var(--white); color: var(--ink); border-radius: 18px; padding: 20px; box-shadow: 0 10px 30px rgba(37,38,45,.08); }
+    .notice-box strong { color: var(--red); }
+    @media (max-width: 760px) {
+      .booking-grid { grid-template-columns: 1fr; }
+      .form-actions { flex-direction: column; }
+      .page-shell { padding-top: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html" aria-label="CIAP-PB - início">
+        <img class="brand-logo" src="logoCiap.jpeg" alt="CIAP" style="display:block;width:200px;height:100px;object-fit:contain">
+      </a>
+      <nav aria-label="Navegação principal">
+        <a href="index.html#sobre">Sobre</a>
+        <a href="index.html#servicos">Serviços</a>
+        <a href="index.html#beneficios">Benefícios</a>
+        <a href="index.html#noticias">Notícias</a>
+        <a href="agendamentos.html" class="nav-cta" target="_blank" rel="noopener noreferrer">Agendamentos</a>
+        <a href="index.html#contato" class="item-contato nav-cta">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <div class="container">
+      <div class="page-header">
+        <p class="eyebrow">AGENDAMENTOS</p>
+        <h1>Disponibilidade</h1>
+  
+      </div>
+
+      <div class="notice-box">
+        <strong>Importante:</strong> as vagas e horários são revisados semanalmente pela equipe da CIAP, e a semana seguinte é divulgada antecipadamente para organização do atendimento.
+      </div>
+
+      <div class="page-actions">
+        <a class="button button-dark" href="index.html">Voltar ao site</a>
+        <a class="button button-gold" href="admin.html" target="_blank" rel="noopener noreferrer">Painel da equipe</a>
+      </div>
+    </div>
+
+    <section class="booking-section" style="margin-top: 28px;">
+      <div class="container booking-wrap">
+        <div class="booking-grid">
+          <form id="formAgendamento" class="booking-form">
+            <label>
+              Nome completo
+              <input type="text" id="nomeCompleto" name="nomeCompleto" maxlength="120" required>
+            </label>
+
+            <label>
+              CPF
+              <input type="text" id="cpf" name="cpf" maxlength="14" placeholder="000.000.000-00" required>
+            </label>
+
+            <label>
+              Número do processo
+              <input type="text" id="numeroProcesso" name="numeroProcesso" maxlength="30" required>
+            </label>
+
+            <label>
+              Dia disponível
+              <select id="diaAgendamento" name="diaAgendamento" required></select>
+            </label>
+
+            <label>
+              Horário disponível
+              <select id="horaAgendamento" name="horaAgendamento" required></select>
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" class="button button-dark">Salvar agendamento</button>
+            </div>
+
+            <p id="mensagemStatus" class="status-message" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const diaSelect = document.getElementById('diaAgendamento');
+    const horaSelect = document.getElementById('horaAgendamento');
+    const statusEl = document.getElementById('mensagemStatus');
+    const form = document.getElementById('formAgendamento');
+    const emailDestino = 'ciapcadastro@gmail.com';
+
+    const bancoKey = 'ciap_agendamentos';
+    const disponibilidadeKey = 'ciap_disponibilidade';
+
+    const disponibilidadePadrao = [
+      { dia: '2026-09-07', horarios: ['09:00', '10:30', '14:00', '15:30'] },
+      { dia: '2026-09-08', horarios: ['09:30', '11:00', '13:30', '16:00'] },
+      { dia: '2026-09-09', horarios: ['08:30', '10:00', '14:30', '17:00'] },
+      { dia: '2026-09-10', horarios: ['09:00', '12:00', '15:00'] },
+      { dia: '2026-09-11', horarios: ['10:00', '13:00', '16:30'] },
+      { dia: '2026-09-12', horarios: ['08:00', '09:30', '11:30', '15:30'] },
+      { dia: '2026-09-13', horarios: ['09:00', '11:00', '14:00', '16:00'] }
+    ];
+
+    function carregarDisponibilidade() {
+      const salvo = localStorage.getItem(disponibilidadeKey);
+      if (!salvo) {
+        localStorage.setItem(disponibilidadeKey, JSON.stringify(disponibilidadePadrao));
+        return disponibilidadePadrao;
+      }
+
+      try {
+        return JSON.parse(salvo);
+      } catch {
+        return disponibilidadePadrao;
+      }
+    }
+
+    function formatarData(dateStr) {
+      const data = new Date(dateStr + 'T00:00:00');
+      return new Intl.DateTimeFormat('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' }).format(data);
+    }
+
+    function salvarAgendamentos(lista) {
+      localStorage.setItem(bancoKey, JSON.stringify(lista));
+    }
+
+    function carregarAgendamentos() {
+      const salva = localStorage.getItem(bancoKey);
+      if (!salva) return [];
+      try {
+        return JSON.parse(salva);
+      } catch {
+        return [];
+      }
+    }
+
+    function montarCalendarioSemana() {
+      const disponibilidades = carregarDisponibilidade();
+
+      diaSelect.innerHTML = '<option value="">Selecione o dia</option>' + disponibilidades.map(item => `
+        <option value="${item.dia}">${formatarData(item.dia)}</option>
+      `).join('');
+
+      const preencherHoras = (dataSelecionada) => {
+        const item = disponibilidades.find(entry => entry.dia === dataSelecionada);
+        horaSelect.innerHTML = '<option value="">Selecione o horário</option>' + (item ? item.horarios.map(hora => `
+            <option value="${hora}">${hora}</option>
+          `).join('') : '');
+      };
+
+      diaSelect.onchange = (event) => preencherHoras(event.target.value);
+      preencherHoras(disponibilidades[0].dia);
+    }
+
+    function formatarCPF(valor) {
+      const digits = valor.replace(/\D/g, '').slice(0, 11);
+      if (digits.length <= 9) {
+        return digits.replace(/(\d{1,3})(\d{0,3})/, (_, a, b) => b ? `${a}.${b}` : a);
+      }
+      return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, (_, a, b, c, d) => d ? `${a}.${b}.${c}-${d}` : `${a}.${b}.${c}`);
+    }
+
+    document.getElementById('cpf').addEventListener('input', (event) => {
+      event.target.value = formatarCPF(event.target.value);
+    });
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const payload = {
+        nomeCompleto: document.getElementById('nomeCompleto').value.trim(),
+        cpf: document.getElementById('cpf').value.trim(),
+        numeroProcesso: document.getElementById('numeroProcesso').value.trim(),
+        diaAgendamento: diaSelect.value,
+        horaAgendamento: horaSelect.value,
+        dataCadastro: new Date().toISOString()
+      };
+
+      if (!payload.nomeCompleto || !payload.cpf || !payload.numeroProcesso || !payload.diaAgendamento || !payload.horaAgendamento) {
+        statusEl.textContent = 'Preencha todos os campos antes de salvar o agendamento.';
+        statusEl.style.color = '#ffd5d5';
+        return;
+      }
+
+      const agendamentos = carregarAgendamentos();
+      agendamentos.push(payload);
+      salvarAgendamentos(agendamentos);
+
+      const linhas = agendamentos.length
+        ? agendamentos.map((item, index) => `${index + 1}. Nome: ${item.nomeCompleto}; CPF: ${item.cpf}; Processo: ${item.numeroProcesso}; Data: ${item.diaAgendamento}; Hora: ${item.horaAgendamento}; Cadastro: ${new Date(item.dataCadastro).toLocaleString('pt-BR')}`).join('\n')
+        : 'Nenhum agendamento registrado até o momento.';
+
+      const assunto = encodeURIComponent('Relatório de agendamentos CIAP');
+      const corpo = encodeURIComponent(`Relatório gerado em ${new Date().toLocaleString('pt-BR')}\n\n${linhas}`);
+      window.location.href = `mailto:${emailDestino}?subject=${assunto}&body=${corpo}`;
+
+      statusEl.textContent = 'Agendamento salvo com sucesso. O relatório foi enviado para o e-mail do cliente.';
+      statusEl.style.color = '#dfffe9';
+      form.reset();
+      horaSelect.innerHTML = '<option value="">Selecione um dia primeiro</option>';
+    });
+
+
+    montarCalendarioSemana();
+  </script>
+</body>
+</html>

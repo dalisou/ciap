@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CIAP-PB | Administração</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: var(--mist); }
+    .admin-shell { padding: 48px 0 90px; }
+    .admin-header { margin-bottom: 24px; }
+    .admin-header h1 { color: var(--red); margin: 0; }
+    .admin-header p { font-size: 18px; margin-top: 8px; }
+    .admin-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; align-items: start; }
+    .panel { background: var(--white); border-radius: 24px; padding: 26px; box-shadow: 0 12px 30px rgba(37,38,45,.08); }
+    .panel h2 { margin-bottom: 18px; color: var(--red); }
+    .panel p { margin-bottom: 12px; }
+    .agenda-list { display: grid; gap: 12px; }
+    .agenda-item { border: 1px solid rgba(37,38,45,.1); border-radius: 16px; padding: 16px; background: var(--mist); }
+    .agenda-item-header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 10px; }
+    .agenda-item span { font-weight: 700; }
+    .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { display: inline-flex; padding: 6px 10px; border-radius: 999px; background: rgba(154,186,91,.18); color: var(--ink); font-size: 13px; font-weight: 700; }
+    .form-grid { display: grid; gap: 16px; }
+    .field { display: grid; gap: 8px; }
+    .field label { font-weight: 700; color: var(--ink); }
+    .field input, .field textarea { width: 100%; border: 1px solid rgba(37,38,45,.2); border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+    .field textarea { min-height: 110px; resize: vertical; }
+    .remove-button { border: none; background: transparent; color: var(--red); font-weight: 700; cursor: pointer; }
+    .button-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .status { min-height: 24px; font-weight: 700; color: var(--ink); }
+    .login-screen { min-height: 60vh; display: grid; place-items: center; padding: 40px 0; }
+    .login-card { max-width: 460px; width: 100%; background: var(--white); border-radius: 24px; padding: 28px; box-shadow: 0 16px 30px rgba(37,38,45,.1); }
+    .login-card h2 { margin: 0 0 12px; color: var(--red); }
+    .login-card form { display: grid; gap: 16px; }
+    .login-card input { width: 100%; border: 1px solid rgba(37,38,45,.2); border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+    .hidden { display: none !important; }
+    @media (max-width: 760px) {
+      .admin-layout { grid-template-columns: 1fr; }
+      .button-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html" aria-label="CIAP-PB - início">
+        <img class="brand-logo" src="logoCiap.jpeg" alt="CIAP" style="display:block;width:200px;height:100px;object-fit:contain">
+      </a>
+      <nav aria-label="Navegação principal">
+        <a href="index.html#sobre">Sobre</a>
+        <a href="index.html#servicos">Serviços</a>
+        <a href="index.html#beneficios">Benefícios</a>
+        <a href="index.html#noticias">Notícias</a>
+        <a href="agendamentos.html" class="nav-cta" target="_blank" rel="noopener noreferrer">Agendamentos</a>
+        <a href="index.html#contato" class="item-contato nav-cta">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <p class="eyebrow">ACESSO RESTRITO</p>
+      <h2>Painel da equipe</h2>
+      <form id="loginForm">
+        <input id="usuarioAdmin" type="text" placeholder="Usuário" required>
+        <input id="senhaAdmin" type="password" placeholder="Senha" required>
+        <button type="submit" class="button button-dark">Entrar</button>
+        <p id="loginStatus" class="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <main id="adminContent" class="admin-shell hidden">
+    <div class="container">
+      <div class="admin-header">
+        <p class="eyebrow">PAINEL DA EQUIPE</p>
+        <h1>Gerenciamento de disponibilidade</h1>
+        <p>Atualize a semana seguinte e publique os horários disponíveis para agendamento.</p>
+      </div>
+
+      <div class="admin-layout">
+        <section class="panel">
+          <h2>Agenda atual</h2>
+          <div id="listaDisponibilidade" class="agenda-list"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Adicionar nova disponibilidade</h2>
+          <form id="formDisponibilidade" class="form-grid">
+            <div class="field">
+              <label for="novaData">Data</label>
+              <input id="novaData" type="date" required>
+            </div>
+
+            <div class="field">
+              <label for="novosHorarios">Horários disponíveis</label>
+              <textarea id="novosHorarios" placeholder="Exemplo: 09:00, 10:30, 14:00" required></textarea>
+            </div>
+
+            <div class="button-row">
+              <button type="submit" class="button button-dark">Salvar disponibilidade</button>
+              <a href="agendamentos.html" class="button button-gold" target="_blank" rel="noopener noreferrer">Abrir página</a>
+              <button type="button" id="logoutButton" class="button button-gold">Sair</button>
+            </div>
+
+            <p id="statusAdmin" class="status" aria-live="polite"></p>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const loginScreen = document.getElementById('loginScreen');
+    const adminContent = document.getElementById('adminContent');
+    const loginForm = document.getElementById('loginForm');
+    const loginStatus = document.getElementById('loginStatus');
+    const listaDisponibilidade = document.getElementById('listaDisponibilidade');
+    const formDisponibilidade = document.getElementById('formDisponibilidade');
+    const statusAdmin = document.getElementById('statusAdmin');
+
+    function setLoginState(isAuthenticated) {
+      loginScreen.classList.toggle('hidden', isAuthenticated);
+      adminContent.classList.toggle('hidden', !isAuthenticated);
+    }
+
+    async function parseJsonResponse(resposta) {
+      const texto = await resposta.text();
+      if (!texto.trim()) {
+        return {};
+      }
+
+      const contentType = resposta.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('O servidor respondeu com conteúdo inválido para esta rota.');
+      }
+
+      try {
+        return JSON.parse(texto);
+      } catch {
+        throw new Error('Resposta do servidor inválida.');
+      }
+    }
+
+    async function verificarLogin() {
+      try {
+        const resposta = await fetch('/api/admin/check', { credentials: 'same-origin' });
+        const dados = await parseJsonResponse(resposta);
+        setLoginState(Boolean(dados.authenticated));
+      } catch {
+        setLoginState(false);
+      }
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const username = document.getElementById('usuarioAdmin').value.trim();
+      const password = document.getElementById('senhaAdmin').value.trim();
+
+      try {
+        const resposta = await fetch('/api/admin/login', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const dados = await parseJsonResponse(resposta);
+        if (!resposta.ok) {
+          throw new Error(dados.message || 'Credenciais inválidas.');
+        }
+
+        document.getElementById('usuarioAdmin').value = '';
+        document.getElementById('senhaAdmin').value = '';
+        loginStatus.textContent = '';
+        setLoginState(true);
+        await carregarDisponibilidade();
+      } catch (error) {
+        loginStatus.textContent = error.message;
+        loginStatus.style.color = '#92251f';
+      }
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', async () => {
+      await fetch('/api/admin/logout', { credentials: 'same-origin' });
+      setLoginState(false);
+      loginStatus.textContent = 'Você saiu do painel.';
+      loginStatus.style.color = '#2d6b36';
+    });
+
+    function formatarData(dateStr) {
+      const data = new Date(dateStr + 'T00:00:00');
+      return new Intl.DateTimeFormat('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' }).format(data);
+    }
+
+    async function carregarDisponibilidade() {
+      try {
+        const resposta = await fetch('/api/admin/disponibilidade', { credentials: 'same-origin' });
+        if (!resposta.ok) {
+          throw new Error('Sessão expirada.');
+        }
+        const dados = await parseJsonResponse(resposta);
+        const disponibilidade = dados.disponibilidade || [];
+        listaDisponibilidade.innerHTML = '';
+
+        if (!disponibilidade.length) {
+          listaDisponibilidade.innerHTML = '<p>Nenhuma disponibilidade cadastrada.</p>';
+          return;
+        }
+
+        disponibilidade.forEach((item) => {
+          const card = document.createElement('div');
+          card.className = 'agenda-item';
+          card.innerHTML = `
+            <div class="agenda-item-header">
+              <span>${formatarData(item.dia)}</span>
+              <button class="remove-button" data-dia="${item.dia}" type="button">Remover</button>
+            </div>
+            <div class="chip-list">
+              ${item.horarios.map(hora => `<span class="chip">${hora}</span>`).join('')}
+            </div>
+          `;
+          listaDisponibilidade.appendChild(card);
+        });
+
+        document.querySelectorAll('.remove-button').forEach((botao) => {
+          botao.addEventListener('click', async () => {
+            const dia = botao.dataset.dia;
+            const resposta = await fetch(`/api/admin/disponibilidade?dia=${encodeURIComponent(dia)}`, {
+              method: 'DELETE',
+              credentials: 'same-origin'
+            });
+            if (resposta.ok) {
+              statusAdmin.textContent = 'Disponibilidade removida.';
+              statusAdmin.style.color = '#92251f';
+              await carregarDisponibilidade();
+            }
+          });
+        });
+      } catch {
+        setLoginState(false);
+      }
+    }
+
+    formDisponibilidade.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = document.getElementById('novaData').value;
+      const horariosTexto = document.getElementById('novosHorarios').value.trim();
+
+      if (!data || !horariosTexto) {
+        statusAdmin.textContent = 'Preencha a data e os horários.';
+        statusAdmin.style.color = '#92251f';
+        return;
+      }
+
+      const horarios = horariosTexto.split(',').map(item => item.trim()).filter(Boolean);
+      if (!horarios.length) {
+        statusAdmin.textContent = 'Informe pelo menos um horário válido.';
+        statusAdmin.style.color = '#92251f';
+        return;
+      }
+
+      try {
+        const resposta = await fetch('/api/admin/disponibilidade', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dia: data, horarios })
+        });
+
+        const dados = await parseJsonResponse(resposta);
+        if (!resposta.ok) {
+          throw new Error(dados.error || 'Não foi possível salvar a disponibilidade.');
+        }
+
+        formDisponibilidade.reset();
+        statusAdmin.textContent = 'Disponibilidade salva com sucesso.';
+        statusAdmin.style.color = '#2d6b36';
+        await carregarDisponibilidade();
+      } catch (error) {
+        statusAdmin.textContent = error.message;
+        statusAdmin.style.color = '#92251f';
+      }
+    });
+
+    verificarLogin();
+  </script>
+</body>
+</html>
